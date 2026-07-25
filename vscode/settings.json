@@ -1,0 +1,44 @@
+{
+    "github.copilot.nextEditSuggestions.enabled": true,
+    "workbench.colorTheme": "Kanagawa",
+    // Editor settings
+    "editor.fontFamily": "'Hack Nerd Font', 'Courier New', monospace",
+    "editor.formatOnSave": true,
+    "editor.tabSize": 4,
+    // Activity Bar and Side Bar locations
+    "workbench.activityBar.location": "top",
+    "workbench.sideBar.location": "right",
+    // Internal terminal
+    "terminal.integrated.fontSize": 14,
+    "terminal.integrated.fontFamily": "'Hack Nerd Font', 'Courier New', monospace",
+    "workbench.secondarySideBar.defaultVisibility": "hidden",
+    "workbench.iconTheme": "material-icon-theme",
+    "github.copilot.enable": {
+        "*": true,
+        "plaintext": false,
+        "markdown": false,
+        "scminput": false,
+        "dotenv": false
+    },
+    "git.autofetch": true,
+    "editor.minimap.enabled": false,
+    // --- Python settings ---
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.defaultFormatter": "charliermarsh.ruff",
+        "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit",
+            "source.fixAll": "explicit" // Ruff will handle all fixable issues
+        }
+    },
+    // "editor.inlayHints.enabled": "off", // Disable inlay hints globally
+    // --- Ty Astral settings ---
+    "python.languageServer": "None",
+    "ty.disableLanguageServices": false,
+    "ty.completions.autoImport": true,
+    "chat.viewSessions.orientation": "stacked",
+    "aws.telemetry": false,
+    // "python.analysis.typeCheckingMode": "strict",
+    // (Optional) Configure Ty's import strategy
+    // "ty.importStrategy": "fromEnvironment"
+}

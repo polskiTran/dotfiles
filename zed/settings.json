@@ -1,0 +1,78 @@
+// Zed settings
+//
+// For information on how to configure Zed, see the Zed
+// documentation: https://zed.dev/docs/configuring-zed
+//
+// To see all of Zed's default settings without changing your
+// custom settings, run `zed: open default settings` from the
+// command palette (cmd-shift-p / ctrl-shift-p)
+{
+    // "disable_ai": true,
+    "indent_guides": {
+        "enabled": true,
+        "line_width": 1,
+        "active_line_width": 2,
+        "coloring": "indent_aware",
+    },
+    "git_panel": {
+        "tree_view": true,
+    },
+    "extend_comment_on_newline": false,
+    "edit_predictions": {
+        "provider": "zed",
+        "disabled_globs": ["*.md", "*.txt", "*.env"],
+    },
+    "telemetry": {
+        "diagnostics": false,
+        "metrics": false,
+    },
+    "terminal": {
+        "font_family": "Hack Nerd Font Mono",
+        "line_height": "standard",
+    },
+    "base_keymap": "VSCode",
+    "minimap": {
+        "show": "never",
+    },
+    "buffer_font_fallbacks": ["Courier New"],
+    "buffer_font_family": "Hack Nerd Font",
+    "tab_size": 4,
+    "ui_font_size": 16,
+    "buffer_font_size": 15,
+    "theme": {
+        "mode": "system",
+        "light": "One Light",
+        "dark": "One Dark",
+    },
+
+    "languages": {
+        "Python": {
+            "language_servers": [
+                // Disable basedpyright and enable ty, and otherwise
+                // use the default configuration.
+                "ty",
+                "ruff",
+                "!basedpyright",
+            ],
+            "format_on_save": "on",
+            "formatter": [
+                {
+                    "code_action": "source.organizeImports.ruff",
+                },
+                {
+                    "code_action": "source.fixAll.ruff",
+                },
+                {
+                    "language_server": {
+                        "name": "ruff",
+                    },
+                },
+            ],
+        },
+    },
+    "scrollbar": {
+        "axes": {
+            "horizontal": false,
+        },
+    },
+}

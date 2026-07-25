@@ -1,0 +1,37 @@
+/* =========================================================
+   Firefox v149.0+ userChrome.css for Sidebery (macOS)
+   Hides horizontal tabs, native vertical tabs, headers,
+   and macOS window controls.
+   ========================================================= */
+
+/* 1. Hide the native horizontal tabs */
+#tabbrowser-tabs {
+    visibility: collapse !important;
+}
+
+/* 2. Hide Firefox's new native vertical tabs and sidebar launcher */
+#sidebar-main,
+#sidebar-launcher-splitter {
+    display: none !important;
+}
+
+/* 3. Remove padding from the classic sidebar box (where Sidebery runs) */
+#sidebar-box {
+    padding: 0 !important;
+}
+
+/* 4. Hide the "Sidebery" sidebar header to reclaim vertical space */
+#sidebar-panel-header {
+    display: none !important;
+}
+
+/* 5. Hide macOS window controls and top spacing */
+.titlebar-buttonbox-container,
+.titlebar-spacer {
+    display: none !important;
+}
+
+/* Optional: Reclaim the dead space at the top of the window if the tabs toolbar is completely empty */
+#TabsToolbar {
+    visibility: collapse !important;
+}

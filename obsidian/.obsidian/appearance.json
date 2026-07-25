@@ -1,0 +1,14 @@
+{
+  "cssTheme": "Minimal",
+  "accentColor": "",
+  "interfaceFontFamily": "Source Code Pro,Martian Grotesk,Martian Mono",
+  "textFontFamily": "Source Code Pro,Atkinson Hyperlegible,Martian Grotesk,JetBrainsMono Nerd Font",
+  "monospaceFontFamily": "Martian Mono,JetBrainsMono Nerd Font Mono",
+  "translucency": false,
+  "baseFontSize": 16,
+  "enabledCssSnippets": [
+    "mermaid-pdf"
+  ],
+  "baseFontSizeAction": false,
+  "showRibbon": true
+}

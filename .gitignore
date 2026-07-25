@@ -1,0 +1,82 @@
+# macOS
+.DS_Store
+**/.DS_Store
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.DocumentRevisions-V100
+.TemporaryItems
+.VolumeIcon.icns
+
+# Environment files and local overrides
+.env
+.env.*
+.envrc
+*.local
+!.env.example
+!.env.sample
+!.env.template
+!.envrc.example
+
+# Credentials, tokens, and secret-bearing config
+**/auth.json
+**/credentials.json
+**/secrets.json
+**/tokens.json
+**/.netrc
+**/.npmrc
+**/.pypirc
+**/.config/gh/hosts.yml
+**/.config/glab-cli/config.yml
+**/.config/rclone/rclone.conf
+**/.docker/config.json
+**/.aws/credentials
+**/.aws/sso/cache/
+**/.azure/
+**/.config/gcloud/
+**/.kube/config
+**/.pi/agent/auth.json
+**/.claude/.credentials.json
+*.token
+*.secret
+
+# Private keys, certificates, vaults, and VPN profiles
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.kdbx
+*.ovpn
+*.mobileconfig
+**/.ssh/id_*
+**/.ssh/*_key
+**/.ssh/known_hosts*
+**/.ssh/authorized_keys
+!**/.ssh/*.pub
+
+# Shell, agent, and application histories/sessions
+**/.bash_history
+**/.zsh_history
+**/.python_history
+**/.node_repl_history
+**/.claude/history.jsonl
+**/.claude/projects/
+**/.codex/sessions/
+**/.pi/agent/sessions/
+
+# Browser profiles and session data
+**/cookies.sqlite*
+**/logins.json
+**/key4.db
+**/places.sqlite*
+**/sessionstore*.jsonlz4
+**/recovery*.jsonlz4
+**/.headless-profile/
+# firefox/**/*sideber*.json
+
+# obsidan workspace
+workspace.json
+bookmarks.json

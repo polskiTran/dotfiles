@@ -1,0 +1,46 @@
+# #!/bin/bash
+
+# # --- Core Layout and Padding ---
+yabai -m config layout bsp                             # Use binary space partitioning
+yabai -m config external_bar all:37:0                  # Top padding for external bar (adjust 32 to your bar's height)
+
+# center mouse on window with focus
+yabai -m config mouse_follows_focus on
+
+# modifier for clicking and dragging with mouse
+yabai -m config mouse_modifier alt
+# set modifier + left-click drag to move window
+yabai -m config mouse_action1 move
+# set modifier + right-click drag to resize window
+yabai -m config mouse_action2 resize
+
+
+# when window is dropped in center of another window, swap them (on edges it will split it)
+yabai -m mouse_drop_action swap
+
+# # --- Window Appearance ---
+# yabai -m config window_border on                       # Enable window borders
+# yabai -m config window_border_width 2                  # Border width
+
+# # --- Floating Windows (Popups, Utilities, etc.) ---
+yabai -m rule --add type=dialog manage=off
+yabai -m rule --add type=utility manage=off
+yabai -m rule --add app="System Preferences" manage=off
+
+# # --- Floating Apps ---
+yabai -m rule --add app="iTerm2" manage=off
+yabai -m rule --add app="System Settings" manage=off
+yabai -m rule --add app="^Activity Monitor$" manage=off
+yabai -m rule --add app="Fantastical" manage=off
+yabai -m rule --add app="Calendar" manage=off
+yabai -m rule --add app="^coconutBattery$" manage=off
+yabai -m rule --add app="^Calculator$" manage=off
+yabai -m rule --add app="^Numi$" manage=off
+
+# # --- Focus and Window Behavior ---
+# yabai -m config focus_follows_mouse autofocus           # Focus window under cursor
+# yabai -m config mouse_follows_focus off                 # Don't move mouse on focus change
+yabai -m config window_topmost on                       # Floating windows always on top
+
+
+# # --- End of Config ---
