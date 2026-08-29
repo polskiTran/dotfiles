@@ -1,0 +1,46 @@
+schemaVersion: "2"
+kind: sandbox
+name: pi
+displayName: Pi Config
+description: Pi coding agent
+
+sandbox:
+    image: "docker/sandbox-templates:shell-docker"
+    entrypoint: [pi]
+
+permissions:
+    network:
+        allow:
+            - "opencode.ai"
+            - "auth.openai.com"
+            - "chatgpt.com"
+            - "registry.npmjs.org"
+            - "cdn.playwright.dev"
+            - "playwright.download.prss.microsoft.com"
+            # Add if using Chrome-for-Testing explicitly:
+            # - "storage.googleapis.com"
+
+setup:
+    install:
+        # for plannotator missing C++ compile
+        - command: "sudo apt-get update && sudo env DEBIAN_FRONTEND=noninteractive apt-get install -y build-essential"
+          user: "1000"
+          description: "Install native Node.js build toolchain"
+
+        - command: "sudo npm install -g pnpm"
+          user: "1000"
+          description: "Install pnpm"
+
+        # Do not wrap this command in sudo. The browser must be installed
+        # into the agent user's cache.
+        - command: "npx -y --package=@playwright/mcp@0.0.78 playwright install --with-deps chromium"
+          user: "1000"
+          description: "Install the MCP-compatible Chromium"
+
+        - command: "test -n \"$(find /home/agent/.cache/ms-playwright -type f -name chrome -perm -111 -print -quit)\""
+          user: "1000"
+          description: "Verify Chromium was installed"
+
+        - command: "sudo npm install -g --ignore-scripts @earendil-works/pi-coding-agent"
+          user: "1000"
+          description: "Install Pi Coding Agent"
