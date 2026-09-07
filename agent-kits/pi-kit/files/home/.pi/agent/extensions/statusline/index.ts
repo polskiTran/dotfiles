@@ -1,7 +1,7 @@
 /**
- * Colorful status: project, model/effort, and context first;
- * token usage and environment second; Codex weekly usage third.
- */
+* Colorful status: project, model/effort, and context first;
+* token usage and environment second; Codex 5-hour and weekly usage below.
+*/
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
@@ -32,14 +32,20 @@ const NO_GIT: GitStatus = {
 
 const CODEX_PROVIDER = "openai-codex";
 const CODEX_USAGE_URL = "https://chatgpt.com/backend-api/wham/usage";
+const CODEX_FIVE_HOUR_SECONDS = 5 * 60 * 60;
 const CODEX_WEEK_SECONDS = 7 * 24 * 60 * 60;
 const CODEX_FETCH_TTL_MS = 5 * 60 * 1000;
 const CODEX_DISPLAY_REFRESH_MS = 60 * 1000;
 const CODEX_REQUEST_TIMEOUT_MS = 15 * 1000;
 
-type CodexWeeklyUsage = {
+type CodexWindowUsage = {
     usedPercent: number;
     resetAt?: number;
+};
+
+type CodexUsage = {
+    fiveHour?: CodexWindowUsage;
+    weekly?: CodexWindowUsage;
 };
 
 async function getGitStatus(pi: ExtensionAPI, cwd: string): Promise<GitStatus> {
@@ -146,36 +152,46 @@ function asNumber(value: unknown): number | undefined {
     return undefined;
 }
 
-function parseCodexWeeklyUsage(
+function parseCodexUsage(
     payload: unknown,
     capturedAt = Date.now(),
-): CodexWeeklyUsage {
+): CodexUsage {
     const rateLimit = asRecord(asRecord(payload)?.rate_limit);
     if (!rateLimit) throw new Error("Codex usage response had no rate limit.");
 
     const windows = [rateLimit.primary_window, rateLimit.secondary_window]
         .map(asRecord)
         .filter((window): window is Record<string, unknown> => Boolean(window));
-    const weekly = windows.find((window) => {
-        const seconds = asNumber(window.limit_window_seconds);
-        return seconds !== undefined && Math.abs(seconds - CODEX_WEEK_SECONDS) <= 60;
-    });
-    if (!weekly) throw new Error("Codex usage response had no weekly window.");
-
-    const usedPercent = asNumber(weekly.used_percent);
-    if (usedPercent === undefined) {
-        throw new Error("Codex weekly usage percentage was unavailable.");
+    function findWindow(duration: number): CodexWindowUsage | undefined {
+        const window = windows.find((candidate) => {
+            const seconds = asNumber(candidate.limit_window_seconds);
+            return seconds !== undefined && Math.abs(seconds - duration) <= 60;
+        });
+        return window ? parseCodexWindow(window, capturedAt) : undefined;
     }
 
-    const rawResetAt = asNumber(weekly.reset_at);
-    const resetAfterSeconds = asNumber(weekly.reset_after_seconds);
+    const fiveHour = findWindow(CODEX_FIVE_HOUR_SECONDS);
+    const weekly = findWindow(CODEX_WEEK_SECONDS);
+    if (!fiveHour && !weekly) throw new Error("Codex usage windows were unavailable.");
+    return { fiveHour, weekly };
+}
+
+function parseCodexWindow(
+    window: Record<string, unknown>,
+    capturedAt: number,
+): CodexWindowUsage | undefined {
+    const usedPercent = asNumber(window.used_percent);
+    if (usedPercent === undefined) return undefined;
+
+    const rawResetAt = asNumber(window.reset_at);
+    const resetAfterSeconds = asNumber(window.reset_after_seconds);
     const resetAt = rawResetAt !== undefined && rawResetAt > 0
         ? rawResetAt < 10_000_000_000
             ? rawResetAt * 1000
             : rawResetAt
         : resetAfterSeconds !== undefined && resetAfterSeconds >= 0
-          ? capturedAt + resetAfterSeconds * 1000
-          : undefined;
+            ? capturedAt + resetAfterSeconds * 1000
+            : undefined;
 
     return {
         usedPercent: Math.min(100, Math.max(0, usedPercent)),
@@ -199,10 +215,10 @@ function codexAccountId(token: string): string | undefined {
     }
 }
 
-async function fetchCodexWeeklyUsage(
+async function fetchCodexUsage(
     ctx: ExtensionContext,
     signal: AbortSignal,
-): Promise<CodexWeeklyUsage> {
+): Promise<CodexUsage> {
     const resolved = await ctx.modelRegistry.getProviderAuth(CODEX_PROVIDER);
     const auth = resolved?.auth;
     const headers = new Headers({ Accept: "application/json" });
@@ -223,7 +239,7 @@ async function fetchCodexWeeklyUsage(
 
     const response = await fetch(CODEX_USAGE_URL, { headers, signal });
     if (!response.ok) throw new Error(`Codex usage request failed (${response.status}).`);
-    return parseCodexWeeklyUsage(await response.json());
+    return parseCodexUsage(await response.json());
 }
 
 function resetCountdown(resetAt: number | undefined, now = Date.now()): string {
@@ -241,18 +257,24 @@ function resetCountdown(resetAt: number | undefined, now = Date.now()): string {
     return `${Math.ceil(days * 10) / 10}d`;
 }
 
-function codexUsageLine(usage: CodexWeeklyUsage, theme: any): string {
+function codexUsageLine(
+    label: string,
+    usage: CodexWindowUsage | undefined,
+    theme: ExtensionContext["ui"]["theme"],
+): string {
+    const prefix = theme.fg("accent", theme.bold("Codex")) +
+        theme.fg("dim", ` · ${label} `);
+    if (!usage) return prefix + theme.fg("dim", "unavailable");
     const percent = Number.isInteger(usage.usedPercent)
         ? usage.usedPercent.toFixed(0)
         : usage.usedPercent.toFixed(1);
     const tone = usage.usedPercent >= 80
         ? "error"
         : usage.usedPercent >= 60
-          ? "warning"
-          : "success";
+            ? "warning"
+            : "success";
     return (
-        theme.fg("accent", theme.bold("Codex")) +
-        theme.fg("dim", " · weekly ") +
+        prefix +
         theme.fg(tone, theme.bold(`${percent}% used`)) +
         theme.fg("dim", ` · resets in ${resetCountdown(usage.resetAt)}`)
     );
@@ -408,7 +430,7 @@ export default function (pi: ExtensionAPI) {
     let requestRender: (() => void) | undefined;
     let projectEnvironment = "system";
     let activeContext: ExtensionContext | undefined;
-    let codexUsage: CodexWeeklyUsage | undefined;
+    let codexUsage: CodexUsage | undefined;
     let codexUsageFetchedAt = 0;
     let codexUsageLoading = false;
     let codexUsageFailed = false;
@@ -461,7 +483,7 @@ export default function (pi: ExtensionAPI) {
         const timeout = setTimeout(() => controller.abort(), CODEX_REQUEST_TIMEOUT_MS);
 
         try {
-            const usage = await fetchCodexWeeklyUsage(ctx, controller.signal);
+            const usage = await fetchCodexUsage(ctx, controller.signal);
             if (activeContext !== ctx || ctx.model?.provider !== CODEX_PROVIDER) return;
             codexUsage = usage;
             codexUsageFetchedAt = Date.now();
@@ -507,13 +529,13 @@ export default function (pi: ExtensionAPI) {
                         const branchName = footerData.getGitBranch();
                         const project = branchName
                             ? theme.fg("text", theme.bold(formatCwd(ctx.cwd))) +
-                              theme.fg("dim", " · ") +
-                              theme.fg("accent", branchName) +
-                              " " +
-                              statusLabel({ ...current, repo: true }, theme)
+                                theme.fg("dim", " · ") +
+                                theme.fg("accent", branchName) +
+                                " " +
+                                statusLabel({ ...current, repo: true }, theme)
                             : theme.fg("text", theme.bold(formatCwd(ctx.cwd))) +
-                              theme.fg("dim", " · ") +
-                              statusLabel({ ...current, repo: false }, theme);
+                                theme.fg("dim", " · ") +
+                                statusLabel({ ...current, repo: false }, theme);
                         const [model, context] = modelAndContext(pi, ctx, theme);
                         const fixedWidth =
                             visibleWidth(model) +
@@ -562,15 +584,24 @@ export default function (pi: ExtensionAPI) {
 
                         const lines = [firstLine, secondLine];
                         if (ctx.model?.provider === CODEX_PROVIDER) {
-                            const codexLine = codexUsage
-                                ? codexUsageLine(codexUsage, theme)
-                                : theme.fg(
-                                      codexUsageFailed ? "warning" : "dim",
-                                      codexUsageFailed
-                                          ? "Codex weekly usage unavailable"
-                                          : "Codex weekly usage…",
-                                  );
-                            lines.push(truncateToWidth(codexLine, width, ""));
+                            if (codexUsage) {
+                                const windows = [
+                                    codexUsageLine("5h", codexUsage.fiveHour, theme),
+                                    codexUsageLine("weekly", codexUsage.weekly, theme),
+                                ];
+                                const combined = windows.join(divider);
+                                const usageLines = visibleWidth(combined) <= width
+                                    ? [combined]
+                                    : windows;
+                                lines.push(...usageLines.map((line) => truncateToWidth(line, width, "")));
+                            } else {
+                                lines.push(truncateToWidth(theme.fg(
+                                    codexUsageFailed ? "warning" : "dim",
+                                    codexUsageFailed
+                                        ? "Codex usage unavailable"
+                                        : "Codex usage…",
+                                ), width, ""));
+                            }
                         }
 
                         return [

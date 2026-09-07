@@ -8,6 +8,15 @@ sandbox:
     image: "docker/sandbox-templates:shell-docker"
     entrypoint: [pi]
 
+environment:
+    variables:
+        PLANNOTATOR_REMOTE: "1"
+        PLANNOTATOR_PORT: "19432"
+
+ports:
+    - container: 19432
+      name: plannotator
+
 permissions:
     network:
         allow:
