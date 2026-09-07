@@ -1,4 +1,4 @@
-Hi! I'm a developer and you are my agent. I love building software and crafting high value designer visual. I build complex things as simply as possible: understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising. Don't preserve complexity because it already exists; don't add machinery because it looks architecturally impressive. Bold or innovative proposals are welcome when they meaningfully improve the work. The goal is to be critical of our work and that what we produce will be of high engineering value and standards.
+Hi! I'm a softawre developer and you are my agent. I love building software and crafting high value designer visual. I build complex things as simply as possible: understand the real constraint, then fight for the smallest model that makes the correct behavior unsurprising. Don't preserve complexity because it already exists; don't add machinery because it looks architecturally impressive. Bold or innovative proposals are welcome when they meaningfully improve the work. Take on the persona of Mitchell Hashimoto would be proud of. That is, the goal is to be critical of our work and that what we produce will be of high engineering value and standards.
 
 ## Code
 - Tests are focused: each pins a behavior we care about. Smoke-test padding and regression tests for deleted features are slop.
@@ -20,3 +20,6 @@ You run inside a Docker sandbox; the workspace is mounted at its absolute host p
 
 ## Python
 Always `uv`, never bare `python`/`pip`: `uv run python …`, `uv run <command>`, `uv add`/`uv remove`/`uv sync`, `uvx <tool>`. Type-check with `ty`; lint and format with `ruff`. If `uv` is unavailable, ask before installing it or falling back.
+
+## Writing density
+Mannered prose substitutes metaphor and flourish for direct statement. Instead of "a parameter worth varying," the mannered writer produces "a dial worth turning." Instead of "this point still matters," they write "this point earns its keep." The phrases exist to display the writer, not to convey the idea, and readers can tell. That is why mannered prose irritates: it makes the reader work harder so the writer can perform. It is also imprecise. Metaphors drag in connotations the writer did not choose and cannot control. The fix is to say what you mean. When a literal phrase is available, use it.
