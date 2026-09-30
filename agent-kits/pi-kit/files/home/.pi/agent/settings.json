@@ -1,27 +1,15 @@
 {
     "defaultProvider": "openai-codex",
-    "defaultModel": "gpt-6-astra",
+    "defaultModel": "gpt-6.1-sol",
     "editorPaddingX": 2,
     "defaultThinkingLevel": "medium",
     "hideThinkingBlock": false,
     "theme": "dark",
     "packages": [
-      "npm:pi-mcp-adapter",
       "npm:@plannotator/pi-extension",
       "npm:pi-subagents",
       "npm:pi-web-access"
     ],
-    "args": [
-      "-y",
-      "@playwright/mcp@0.0.78",
-      "--headless",
-      "--browser",
-      "chromium",
-      "--no-sandbox"
-    ],
-    "env": {
-      "PLAYWRIGHT_BROWSERS_PATH": "/home/agent/.cache/ms-playwright"
-    },
     "tuiMode": "fullscreen",
     "enableInstallTelemetry": false
 }

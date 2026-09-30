@@ -40,6 +40,10 @@ setup:
           user: "1000"
           description: "Install pnpm"
 
+        - command: 'mkdir -p "$(npm config get prefix)/lib/node_modules"'
+          user: "1000"
+          description: "Initialize the agent npm global directory for npx"
+
         # Do not wrap this command in sudo. The browser must be installed
         # into the agent user's cache.
         - command: "npx -y --package=@playwright/mcp@0.0.78 playwright install --with-deps chromium"

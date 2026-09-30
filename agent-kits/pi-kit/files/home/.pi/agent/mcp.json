@@ -1,16 +1,19 @@
 {
-  "mcpServers": {
+    "mcpServers": {
     "playwright": {
-      "command": "npx",
-      "args": [
+        "command": "npx",
+        "args": [
         "-y",
         "@playwright/mcp@0.0.78",
         "--headless",
         "--browser",
         "chromium",
         "--no-sandbox"
-      ],
-      "directTools": true
+        ],
+        "env": {
+        "PLAYWRIGHT_BROWSERS_PATH": "/home/agent/.cache/ms-playwright"
+        },
+        "exposure": "codemode"
     }
-  }
+    }
 }
