@@ -1,9 +1,9 @@
 /**
-* Colorful status: project, model/effort, and context first;
-* token usage and environment second; Codex 5-hour and weekly usage below.
-*/
+ * Colorful status: project, model/effort, and context first;
+ * token usage and environment second; Codex 5-hour and weekly limits third.
+ */
 
-import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
+import type { ExtensionAPI, ExtensionContext, Theme } from "@earendil-works/pi-coding-agent";
 import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
 import { Buffer } from "node:buffer";
 import { existsSync } from "node:fs";
@@ -162,41 +162,38 @@ function parseCodexUsage(
     const windows = [rateLimit.primary_window, rateLimit.secondary_window]
         .map(asRecord)
         .filter((window): window is Record<string, unknown> => Boolean(window));
-    function findWindow(duration: number): CodexWindowUsage | undefined {
-        const window = windows.find((candidate) => {
-            const seconds = asNumber(candidate.limit_window_seconds);
+    // Identify limits by duration: primary and secondary can arrive in either order.
+    function parseWindow(duration: number): CodexWindowUsage | undefined {
+        const window = windows.find((window) => {
+            const seconds = asNumber(window.limit_window_seconds);
             return seconds !== undefined && Math.abs(seconds - duration) <= 60;
         });
-        return window ? parseCodexWindow(window, capturedAt) : undefined;
+        if (!window) return undefined;
+        const usedPercent = asNumber(window.used_percent);
+        if (usedPercent === undefined) return undefined;
+
+        const rawResetAt = asNumber(window.reset_at);
+        const resetAfterSeconds = asNumber(window.reset_after_seconds);
+        const resetAt = rawResetAt !== undefined && rawResetAt > 0
+            ? rawResetAt < 10_000_000_000
+                ? rawResetAt * 1000
+                : rawResetAt
+            : resetAfterSeconds !== undefined && resetAfterSeconds >= 0
+              ? capturedAt + resetAfterSeconds * 1000
+              : undefined;
+
+        return {
+            usedPercent: Math.min(100, Math.max(0, usedPercent)),
+            resetAt,
+        };
     }
 
-    const fiveHour = findWindow(CODEX_FIVE_HOUR_SECONDS);
-    const weekly = findWindow(CODEX_WEEK_SECONDS);
-    if (!fiveHour && !weekly) throw new Error("Codex usage windows were unavailable.");
+    const fiveHour = parseWindow(CODEX_FIVE_HOUR_SECONDS);
+    const weekly = parseWindow(CODEX_WEEK_SECONDS);
+    if (!fiveHour && !weekly) {
+        throw new Error("Codex usage response had no supported usage windows.");
+    }
     return { fiveHour, weekly };
-}
-
-function parseCodexWindow(
-    window: Record<string, unknown>,
-    capturedAt: number,
-): CodexWindowUsage | undefined {
-    const usedPercent = asNumber(window.used_percent);
-    if (usedPercent === undefined) return undefined;
-
-    const rawResetAt = asNumber(window.reset_at);
-    const resetAfterSeconds = asNumber(window.reset_after_seconds);
-    const resetAt = rawResetAt !== undefined && rawResetAt > 0
-        ? rawResetAt < 10_000_000_000
-            ? rawResetAt * 1000
-            : rawResetAt
-        : resetAfterSeconds !== undefined && resetAfterSeconds >= 0
-            ? capturedAt + resetAfterSeconds * 1000
-            : undefined;
-
-    return {
-        usedPercent: Math.min(100, Math.max(0, usedPercent)),
-        resetAt,
-    };
 }
 
 function codexAccountId(token: string): string | undefined {
@@ -257,26 +254,31 @@ function resetCountdown(resetAt: number | undefined, now = Date.now()): string {
     return `${Math.ceil(days * 10) / 10}d`;
 }
 
-function codexUsageLine(
+function codexUsageSegment(
     label: string,
     usage: CodexWindowUsage | undefined,
-    theme: ExtensionContext["ui"]["theme"],
+    theme: Theme,
+    loading: boolean,
 ): string {
-    const prefix = theme.fg("accent", theme.bold("Codex")) +
-        theme.fg("dim", ` · ${label} `);
-    if (!usage) return prefix + theme.fg("dim", "unavailable");
+    const prefix = theme.fg("dim", `${label} `);
+    if (!usage) {
+        return prefix + theme.fg(
+            loading ? "dim" : "warning",
+            loading ? "usage…" : "usage unavailable",
+        );
+    }
     const percent = Number.isInteger(usage.usedPercent)
         ? usage.usedPercent.toFixed(0)
         : usage.usedPercent.toFixed(1);
     const tone = usage.usedPercent >= 80
         ? "error"
         : usage.usedPercent >= 60
-            ? "warning"
-            : "success";
+          ? "warning"
+          : "success";
     return (
         prefix +
         theme.fg(tone, theme.bold(`${percent}% used`)) +
-        theme.fg("dim", ` · resets in ${resetCountdown(usage.resetAt)}`)
+        theme.fg("dim", ` resets in ${resetCountdown(usage.resetAt)}`)
     );
 }
 
@@ -529,13 +531,13 @@ export default function (pi: ExtensionAPI) {
                         const branchName = footerData.getGitBranch();
                         const project = branchName
                             ? theme.fg("text", theme.bold(formatCwd(ctx.cwd))) +
-                                theme.fg("dim", " · ") +
-                                theme.fg("accent", branchName) +
-                                " " +
-                                statusLabel({ ...current, repo: true }, theme)
+                              theme.fg("dim", " · ") +
+                              theme.fg("accent", branchName) +
+                              " " +
+                              statusLabel({ ...current, repo: true }, theme)
                             : theme.fg("text", theme.bold(formatCwd(ctx.cwd))) +
-                                theme.fg("dim", " · ") +
-                                statusLabel({ ...current, repo: false }, theme);
+                              theme.fg("dim", " · ") +
+                              statusLabel({ ...current, repo: false }, theme);
                         const [model, context] = modelAndContext(pi, ctx, theme);
                         const fixedWidth =
                             visibleWidth(model) +
@@ -584,24 +586,14 @@ export default function (pi: ExtensionAPI) {
 
                         const lines = [firstLine, secondLine];
                         if (ctx.model?.provider === CODEX_PROVIDER) {
-                            if (codexUsage) {
-                                const windows = [
-                                    codexUsageLine("5h", codexUsage.fiveHour, theme),
-                                    codexUsageLine("weekly", codexUsage.weekly, theme),
-                                ];
-                                const combined = windows.join(divider);
-                                const usageLines = visibleWidth(combined) <= width
-                                    ? [combined]
-                                    : windows;
-                                lines.push(...usageLines.map((line) => truncateToWidth(line, width, "")));
-                            } else {
-                                lines.push(truncateToWidth(theme.fg(
-                                    codexUsageFailed ? "warning" : "dim",
-                                    codexUsageFailed
-                                        ? "Codex usage unavailable"
-                                        : "Codex usage…",
-                                ), width, ""));
-                            }
+                            const loading = !codexUsage && !codexUsageFailed;
+                            const codexLine =
+                                theme.fg("accent", theme.bold("Codex")) +
+                                theme.fg("dim", " · ") +
+                                codexUsageSegment("5h", codexUsage?.fiveHour, theme, loading) +
+                                theme.fg("dim", " | ") +
+                                codexUsageSegment("weekly", codexUsage?.weekly, theme, loading);
+                            lines.push(truncateToWidth(codexLine, width, ""));
                         }
 
                         return [
