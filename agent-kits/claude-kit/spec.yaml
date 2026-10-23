@@ -19,18 +19,6 @@ setup:
       user: "0"
       description: Install pnpm
 
-    - command: "npx -y playwright install --with-deps chromium"
-      user: "1000"
-      description: Install ARM64 Playwright Chromium
-
-    - command: |
-        set -e
-        bin=$(ls -d /home/agent/.cache/ms-playwright/chromium-*/chrome-linux/chrome | sort -V | tail -1)
-        mkdir -p /opt/google/chrome
-        ln -sfn "$bin" /opt/google/chrome/chrome
-      user: "0"
-      description: Point the chrome channel at ARM64 Chromium for Playwright MCP
-
   startup:
     - command:
         - sh
