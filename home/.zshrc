@@ -85,22 +85,6 @@ lst() {
     --no-permissions -T -L "$depth"
 }
 
-
-# ======= AGENT SANDBOX ALIASES =======
-
-# Herdr agent: Pi
-alias pihn='HERDR_AGENT=pi sbx run "$HOME/Documents/GitHub/dotfiles/agent-kits/pi-kit/" -m 8gb'
-alias pih='HERDR_AGENT=pi sbx run "$HOME/Documents/GitHub/dotfiles/agent-kits/pi-kit/"'
-
-# Herdr agent: Claude
-alias claudehn='HERDR_AGENT=claude sbx run claude --kit "$HOME/Documents/GitHub/dotfiles/agent-kits/claude-kit/" -m 8gb'
-alias claudeh='HERDR_AGENT=claude sbx run claude'
-
-# Herdr agent: OMP
-alias omphn='HERDR_AGENT=omp sbx run "$HOME/Documents/GitHub/dotfiles/agent-kits/omp-kit/" -m 8gb'
-alias omph='HERDR_AGENT=omp sbx run "$HOME/Documents/GitHub/dotfiles/agent-kits/omp-kit/"'
-
-
 # ======= SANDBOX ALIASES =======
 
 # Pi
@@ -110,6 +94,18 @@ alias pi-sbx='sbx run "$HOME/Documents/GitHub/dotfiles/agent-kits/pi-kit/"'
 # Claude
 alias claude-new-sbx='sbx run claude --kit "$HOME/Documents/GitHub/dotfiles/agent-kits/claude-kit/" -m 8gb'
 alias claude-sbx='sbx run claude'
+
+
+# Chrome for sandboxed agents: the installed (auto-updating) Chrome with
+# DevTools on 127.0.0.1:9222, which claude-kit relays into the sandbox. Runs a
+# separate profile — Chrome refuses remote debugging on the default one, and
+# agents shouldn't see your real logins. Pass --headless to hide the window.
+chrome-agent() {
+  open -na "Google Chrome" --args \
+    --remote-debugging-port=9222 \
+    --user-data-dir="$HOME/Library/Application Support/Google/Chrome-Agent" \
+    --no-first-run --no-default-browser-check "$@"
+}
 
 
 # ======= LAZY NVM =======
