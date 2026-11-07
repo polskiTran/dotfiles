@@ -4,35 +4,33 @@
     "CLAUDE_CODE_DISABLE_FEEDBACK_SURVEY": "1",
     "DISABLE_ERROR_REPORTING": "1"
   },
+  "model": "opus",
+  "modelSettings": {
+    "claude-opus-5-5": { "effortLevel": "medium" }
+  },
+  "alwaysThinkingEnabled": true,
   "permissions": {
+    "defaultMode": "auto",
     "deny": [
-      "EnterPlanMode",
-      "ExitPlanMode",
-      "DesignSync",
-      "NotebookEdit",
-      "SendMessage",
-      "PushNotification",
-      "RemoteTrigger",
-      "ReportFindings",
-      "ScheduleWakeup",
-      "AskUserQuestion",
-      "CronCreate",
-      "CronDelete",
-      "CronList"
+      "EnterPlanMode", "ExitPlanMode", "DesignSync", "NotebookEdit",
+      "SendMessage", "PushNotification", "RemoteTrigger", "ReportFindings",
+      "ScheduleWakeup", "AskUserQuestion", "CronCreate", "CronDelete", "CronList"
     ]
   },
+  "attribution": { "commit": "", "pr": "" },
   "disableClaudeAiConnectors": true,
   "disableBundledSkills": true,
   "disableRemoteControl": true,
   "disableWorkflows": true,
   "disableArtifact": true,
+  "autoMemoryEnabled": false,
+  "skipDangerousModePermissionPrompt": true,
+  "themeId": 1,
   "statusLine": {
     "type": "command",
     "command": "~/.claude/statusline.sh"
   },
-  "autoMemoryEnabled": false,
-  "skipDangerousModePermissionPrompt": true,
   "enabledPlugins": {
-    "playwright@claude-plugins-official": true
+    "playwright@claude-plugins-official": true,
   }
 }
