@@ -6,7 +6,6 @@
     "hideThinkingBlock": false,
     "theme": "dark",
     "packages": [
-      "npm:@plannotator/pi-extension",
       "npm:pi-subagents",
       "npm:pi-web-access"
     ],

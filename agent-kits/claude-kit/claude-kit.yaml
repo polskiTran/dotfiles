@@ -1,0 +1,45 @@
+# syntax=docker/sandbox-kit:3
+# Personal Claude Code config layered onto the sbx `claude` workload.
+# Content (dotfiles, Node + pnpm) is built by claude-kit.dockerfile.
+schemaVersion: "3"
+kind: mixin
+displayName: Claude Code Config
+description: Claude Code setup — settings, statusline, CLAUDE.md, Node, pnpm, agent-browser
+version: "1.0.0"
+
+provides: ["claude-dotfiles"]
+# Orders our hooks after the claude kit's, which seeds settings.json at install.
+requires: ["claude"]
+
+capabilities:
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          - registry.npmjs.org
+          - "*.npmjs.org"
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      startup:
+        # Deep-merge our settings over the ones the claude kit seeds.
+        # Idempotent: jq `*` replaces arrays rather than appending.
+        - command: |
+            set -e
+            t=/home/agent/.claude/settings.json
+            kit=/home/agent/settings.json.kit
+            if [ -s "$t" ]; then
+              jq -s '.[0] * .[1]' "$t" "$kit" > "$t.tmp" && mv "$t.tmp" "$t"
+            else
+              cp "$kit" "$t"
+            fi
+          user: "1000"
+          description: Apply custom Claude settings
+
+        # agent-browser drives the Mac's own Chrome (start it on the host with
+        # `chrome-agent`, home/.zshrc). The relay serves it at 127.0.0.1:9222.
+        - command: exec node /usr/local/lib/cdp-relay.mjs
+          user: "1000"
+          background: true
+          env: [HTTP_PROXY]
+          description: Relay host Chrome DevTools into the sandbox

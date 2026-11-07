@@ -18,6 +18,8 @@ Hi! I'm a softawre developer and you are my agent. I love building software and 
 ## Sandbox
 You run inside a Docker sandbox; the workspace is mounted at its absolute host path. `sudo` is passwordless — use it for package installs.
 
+For browser work, use the `agent-browser` CLI. Before first use, run `agent-browser skills get core` and follow it. It drives Chrome on the host Mac; if it can't connect, ask me to run `chrome-agent` there.
+
 ## Python
 Always `uv`, never bare `python`/`pip`: `uv run python …`, `uv run <command>`, `uv add`/`uv remove`/`uv sync`, `uvx <tool>`. Type-check with `ty`; lint and format with `ruff`. If `uv` is unavailable, ask before installing it or falling back.
 

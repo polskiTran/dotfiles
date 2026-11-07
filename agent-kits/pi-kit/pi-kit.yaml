@@ -1,0 +1,34 @@
+# syntax=docker/sandbox-kit:3
+# Pi coding agent as a standalone workload on the sbx shell base.
+# Content (Node, pi, pnpm, agent-browser, dotfiles) is built by pi-kit.dockerfile.
+schemaVersion: "3"
+kind: workload
+displayName: Pi Config
+description: Pi coding agent with personal config, pnpm and agent-browser
+version: "1.0.0"
+
+provides: ["pi"]
+
+capabilities:
+  # Workspace and sandbox env (WORKSPACE_DIR, SANDBOX_NAME, ...), as the shell base declares.
+  - type: com.docker.sandbox/sbx@1
+
+  - type: com.docker.sandbox/network-policy@1
+    config:
+      runtime:
+        allow:
+          - opencode.ai
+          - auth.openai.com
+          - chatgpt.com
+          - registry.npmjs.org
+
+  - type: com.docker.sandbox/lifecycle@1
+    config:
+      startup:
+        # agent-browser drives the Mac's own Chrome (start it on the host with
+        # `chrome-agent`, home/.zshrc). The relay serves it at 127.0.0.1:9222.
+        - command: exec node /usr/local/lib/cdp-relay.mjs
+          user: "1000"
+          background: true
+          env: [HTTP_PROXY]
+          description: Relay host Chrome DevTools into the sandbox
