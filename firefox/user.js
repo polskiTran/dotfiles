@@ -244,6 +244,15 @@ user_pref("browser.download.always_ask_before_handling_new_types", true);
 // // such as form content, scrollbar positions, and POST data
 // user_pref("browser.sessionstore.privacy_level", 2);
 
+// PREF: disable firefox new nova UI
+user_pref("browser.nova.enabled", false);
+
+// PREF: ctrl tab in recently used order
+user_pref("browser.ctrlTab.sortByRecentlyUsed", true);
+
+// PREF: open previous windows and tabs
+user_pref("browser.startup.page", 3);
+
 /****************************************************************************
  * END: BETTERFOX                                                           *
 ****************************************************************************/
