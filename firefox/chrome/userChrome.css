@@ -17,10 +17,11 @@
 
 /* 3. Remove padding from the classic sidebar box (where Sidebery runs) */
 #sidebar-box {
-    padding: 0 !important;
+    padding: 0px !important;
 }
 
-/* 4. Hide the "Sidebery" sidebar header to reclaim vertical space */
+/* 4. Hide Firefox's native sidebar header (Sidebery) */
+#sidebar-header,
 #sidebar-panel-header {
     display: none !important;
 }
@@ -35,3 +36,13 @@
 #TabsToolbar {
     visibility: collapse !important;
 }
+
+/* Sidebery hack */
+/*@media -moz-pref("sidebar.verticalTabs") and -moz-pref("sidebar.visibility","expand-on-hover") {
+    #main-window > body > #browser {
+        --sidebar-launcher-collapsed-width: 10px !important;
+    }
+    sidebar-main:not([expanded]) {
+        max-width: 10px !important;
+    }
+}*/
