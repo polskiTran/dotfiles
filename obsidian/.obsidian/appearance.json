@@ -1,8 +1,8 @@
 {
   "cssTheme": "Minimal",
   "accentColor": "",
-  "interfaceFontFamily": "Source Code Pro,Martian Grotesk,Martian Mono",
-  "textFontFamily": "Source Code Pro,Atkinson Hyperlegible,Martian Grotesk,JetBrainsMono Nerd Font",
+  "interfaceFontFamily": "Departure Mono,Martian Grotesk",
+  "textFontFamily": "JetBrainsMono Nerd Font,Martian Grotesk,Hack Nerd Font,Source Code Pro,Departure Mono",
   "monospaceFontFamily": "Martian Mono,JetBrainsMono Nerd Font Mono",
   "translucency": false,
   "baseFontSize": 16,

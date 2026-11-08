@@ -25,5 +25,7 @@
   "minimal-style@@pdf-invert-dark": false,
   "minimal-style@@pdf-dark-opacity": 1,
   "minimal-style@@image-muted": 1,
-  "minimal-style@@blockquote-border-thickness": 1
+  "minimal-style@@blockquote-border-thickness": 1,
+  "verso-style@@verso-natural-media-width": false,
+  "verso-style@@line-height-normal": 1.65
 }
